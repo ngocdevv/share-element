@@ -1,98 +1,143 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { LinearGradient } from 'expo-linear-gradient';
+import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import React from 'react';
+import { Dimensions, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import Animated, { FadeInDown, FadeInUp, ZoomIn } from 'react-native-reanimated';
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+const { width, height } = Dimensions.get('window');
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+export default function OnboardingScreen() {
+  const router = useRouter();
+
+  const handleGetStarted = () => {
+    router.replace('/(tabs)');
+  };
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <View style={styles.container}>
+      <StatusBar style="light" />
+      <ImageBackground
+        source={require('../../assets/images/onboarding_bg.png')}
+        style={styles.background}
+        resizeMode="cover"
+      >
+        <LinearGradient
+          colors={['transparent', 'rgba(0,0,0,0.8)']}
+          style={styles.gradient}
+        />
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
+        <View style={styles.content}>
+          <Animated.View entering={FadeInUp.delay(300).duration(1000)} style={styles.headerContainer}>
+            <View style={styles.decorationDots}>
+              {[...Array(5)].map((_, i) => (
+                <View key={i} style={[styles.dot, { opacity: (5 - i) / 5 }]} />
+              ))}
+            </View>
+          </Animated.View>
 
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
+          <View style={styles.textContainer}>
+            <Animated.Text entering={FadeInDown.delay(500).duration(1000)} style={styles.subTitle}>
+              It's a Big World
+            </Animated.Text>
+            <Animated.Text entering={FadeInDown.delay(700).duration(1000)} style={styles.title}>
+              Out There,
+            </Animated.Text>
+            <Animated.Text entering={FadeInDown.delay(900).duration(1000)} style={[styles.title, styles.highlight]}>
+              Go Explore
+            </Animated.Text>
+          </View>
 
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
-          />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
-
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+          <Animated.View entering={ZoomIn.delay(1200).duration(800)} style={styles.buttonContainer}>
+            <TouchableOpacity style={styles.button} onPress={handleGetStarted} activeOpacity={0.8}>
+              <Text style={styles.buttonText}>Get Started →</Text>
+            </TouchableOpacity>
+            <Text style={styles.footerText}>Privacy Policy</Text>
+          </Animated.View>
+        </View>
+      </ImageBackground>
+    </View>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
+  },
+  background: {
+    flex: 1,
+    width: width,
+    height: height,
+  },
+  gradient: {
+    ...StyleSheet.absoluteFillObject,
+    top: '40%',
+  },
+  content: {
+    flex: 1,
+    paddingHorizontal: 30,
+    paddingBottom: 50,
+    justifyContent: 'space-between',
+  },
+  headerContainer: {
+    marginTop: 60,
+  },
+  decorationDots: {
     flexDirection: 'row',
+    gap: 5
   },
-  safeArea: {
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
+  dot: {
+    width: 8,
+    height: 8,
+    borderRadius: 4,
+    backgroundColor: '#2D9CDB', // Teal-ish color from image
   },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
+  textContainer: {
+    marginTop: 'auto',
+    marginBottom: 40,
+  },
+  subTitle: {
+    fontSize: 20,
+    color: '#E0E0E0',
+    fontWeight: '600',
+    marginBottom: 10,
   },
   title: {
-    textAlign: 'center',
+    fontSize: 52,
+    color: '#FFFFFF',
+    fontWeight: '800',
+    lineHeight: 56,
   },
-  code: {
-    textTransform: 'uppercase',
+  highlight: {
+    color: '#FFF', // Keeping white for cleanliness, could use accent
   },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
+  buttonContainer: {
+    alignItems: 'center',
+    gap: 20,
+  },
+  button: {
+    backgroundColor: '#00BFA6', // Teal/Green accent
+    paddingVertical: 18,
+    paddingHorizontal: 40,
+    borderRadius: 30,
+    width: '100%',
+    alignItems: 'center',
+    shadowColor: '#00BFA6',
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowOpacity: 0.3,
+    shadowRadius: 20,
+    elevation: 10,
+  },
+  buttonText: {
+    color: '#FFFFFF',
+    fontSize: 18,
+    fontWeight: 'bold',
+  },
+  footerText: {
+    color: 'rgba(255,255,255,0.5)',
+    fontSize: 12,
   },
 });
