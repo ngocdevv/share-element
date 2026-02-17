@@ -2,7 +2,7 @@ import { LinearGradient } from 'expo-linear-gradient';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import React from 'react';
-import { Dimensions, ImageBackground, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Dimensions, ImageBackground, Platform, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import Animated, { FadeInDown, FadeInUp, ZoomIn } from 'react-native-reanimated';
 
 const { width, height } = Dimensions.get('window');
@@ -11,7 +11,13 @@ export default function OnboardingScreen() {
   const router = useRouter();
 
   const handleGetStarted = () => {
-    router.replace('/(tabs)');
+    if (Platform.OS === 'android') {
+      // Android: navigate to React Navigation host for shared element transitions
+      router.replace('/android-app');
+    } else {
+      // iOS: keep existing expo-router tab flow with AppleZoom
+      router.replace('/(tabs)');
+    }
   };
 
   return (
@@ -90,7 +96,7 @@ const styles = StyleSheet.create({
     width: 8,
     height: 8,
     borderRadius: 4,
-    backgroundColor: '#2D9CDB', // Teal-ish color from image
+    backgroundColor: '#2D9CDB',
   },
   textContainer: {
     marginTop: 'auto',
@@ -109,14 +115,14 @@ const styles = StyleSheet.create({
     lineHeight: 56,
   },
   highlight: {
-    color: '#FFF', // Keeping white for cleanliness, could use accent
+    color: '#FFF',
   },
   buttonContainer: {
     alignItems: 'center',
     gap: 20,
   },
   button: {
-    backgroundColor: '#00BFA6', // Teal/Green accent
+    backgroundColor: '#00BFA6',
     paddingVertical: 18,
     paddingHorizontal: 40,
     borderRadius: 30,
